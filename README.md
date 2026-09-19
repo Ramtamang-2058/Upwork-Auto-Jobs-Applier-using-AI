@@ -1,158 +1,122 @@
-<!--
-  Title: UpworkScribe AI: Automated Jobs Application on Upwork
-  Description: UpworkScribe AI is an innovative, AI tool designed to automate and optimize the job application process on Upwork, enabling freelancers to efficiently apply to multiple relevant projects with personalized cover letters.
-  Author: AIXerum
-  Keywords: Langgraph, litellm, LLAMA3, Upwork automation, automated job applications, AI cover letter generator, job scraping, freelance tools
--->
+# Upwork Auto Jobs Applier using AI
 
-# UpworkScribe AI: Automated Jobs Application on Upwork
+Automates the repetitive parts of applying to Upwork jobs: it scrapes job
+listings, classifies them against your freelancer profile, and generates
+personalised AI cover letters. A Flask API server exposes the same generation
+engine to a Chrome extension and an Electron app.
 
-**UpworkScribe AI is not just a tool; it's your partner in navigating the competitive world of freelancing, helping you secure more projects and grow your freelance career. 🚀**
+> **Note**: automated scraping and auto-submission may violate Upwork's terms of
+> service. Review generated letters before submitting, and use at your own risk.
 
-## Introduction
+## How it works
 
-**UpworkScribe AI** is an AI tool designed to simplify and accelerate the freelance job application process on Upwork. In today's fast-paced gig economy, where opportunities can disappear within hours, this system offers freelancers a significant edge. By harnessing the power of AI and automation, it enables freelancers to efficiently apply to multiple relevant projects with personalized cover letters, maximizing their chances of securing ideal freelance opportunities.
+1. **Scrape** - pulls job listings for a search term (Selenium).
+2. **Classify** - an LLM agent ranks listings against your `files/profile.md`.
+3. **Generate** - a writer agent produces a personalised cover letter per match.
+4. **Review** - letters accumulate in `files/cover_letter.txt` for review
+   before you submit them manually.
 
-## The Challenge of Modern Freelancing
+The generation engine builds on [LangGraph](https://github.com/langchain-ai/langgraph)
+for the workflow and [LiteLLM](https://github.com/BerriAI/litellm) so you can
+swap the underlying model (Gemini, Groq, OpenAI, ...) with a config change.
 
-The freelance marketplace has undergone a dramatic transformation in the digital age. While platforms like Upwork have opened up a world of opportunities, they have also intensified competition. Freelancers often find themselves spending countless hours searching for suitable projects, tailoring proposals, and crafting unique cover letters. This process can be not only time-consuming but also mentally exhausting, leading to missed opportunities and proposal fatigue.
+## Project structure
 
-## Enter UpworkScribe AI: Your Personal Freelance Assistant
-
-UpworkScribe AI steps in as a game-changing solution to these challenges. It's not just a tool; it's your tireless, 24/7 freelance proposal partner. By automating the most time-consuming aspects of the job search and application process, it allows you to focus on what truly matters - preparing for client interviews and delivering outstanding work.
-
-## Features
-
-### Jobs Scraping and Classification
-
-- Customizable search criteria based on user-provided job titles
-- Continuous scanning for new project listings
-- Smart classification to identify jobs matching the freelancer profiles
-
-### AI Cover Letter Generation
-
-- Dynamic cover letter creation based on job descriptions
-- Personalization aligned with user writing style, skills and past experiences.
-- Keyword optimization for improved proposal relevance
-
-## How It Works
-
-1. **Job Scraping**: The system scrapes Upwork for job listings based on user-provided criteria.
-2. **Job Classification**: AI agents classify scraped jobs to identify the best matches for the user's freelance profile.
-3. **Cover Letter Generation**: Personalized cover letters are created using AI, tailored to each job description and the user's skills, experience and writing style.
-4. **Review and Submission**: Generated cover letters are saved for user review before submission.
-
-### System Flowchart
-
-This is the detailed flow of the system:
-
-[![](https://mermaid.ink/img/pako:eNqdk0FvozAQhf-K5UirrZRI0eaScKiUQBulaquqNOoBejB4CFbARrZJWiX57x0H0tJbFw54Bt735hnhA00VB-rRjWZVTl6CWBK85tHagCYrWdX2jYxG18c7lZAXYQs4ksVf14QpEqCvGmBxFj2zPXHv7oWxQm7MkfgH1_sFM0ZkAi1b_w1Ie2pq_4w-MJvmwB2OWBD5aofqe7AWl1ctcOmgb110Lcsf8E0UCJMyzVtVc79ttvSkVSYKaDblfDEnCe2H21jQ1QdnxRIkaGbRuxsIhyyjZ9gJ2JM_JGQ7aEctz9C8qjSq-ZGsorBOSmGJVWRd7ZXe_hA-AnBDnJERSjYBYtkojMtE5gTTFt4gm2VDY7XagjeYTqdtPdoLbnPvX_U-TFWhtDcYj8ddfNHiSfKNTyaT3-L-ZXqS9MGDy_SsF37T4pzzPvjtJXw264Mvv758L3zV4rP_mU6HtARdMsHxRB6cXUxtDiXE1MOSM72NaSxPqGO1VeGHTKlndQ1DqlW9yamXscJgV1ccf9pAMDzWZfv09AkL_EYn?type=png)](https://mermaid.live/edit#pako:eNqdk0FvozAQhf-K5UirrZRI0eaScKiUQBulaquqNOoBejB4CFbARrZJWiX57x0H0tJbFw54Bt735hnhA00VB-rRjWZVTl6CWBK85tHagCYrWdX2jYxG18c7lZAXYQs4ksVf14QpEqCvGmBxFj2zPXHv7oWxQm7MkfgH1_sFM0ZkAi1b_w1Ie2pq_4w-MJvmwB2OWBD5aofqe7AWl1ctcOmgb110Lcsf8E0UCJMyzVtVc79ttvSkVSYKaDblfDEnCe2H21jQ1QdnxRIkaGbRuxsIhyyjZ9gJ2JM_JGQ7aEctz9C8qjSq-ZGsorBOSmGJVWRd7ZXe_hA-AnBDnJERSjYBYtkojMtE5gTTFt4gm2VDY7XagjeYTqdtPdoLbnPvX_U-TFWhtDcYj8ddfNHiSfKNTyaT3-L-ZXqS9MGDy_SsF37T4pzzPvjtJXw264Mvv758L3zV4rP_mU6HtARdMsHxRB6cXUxtDiXE1MOSM72NaSxPqGO1VeGHTKlndQ1DqlW9yamXscJgV1ccf9pAMDzWZfv09AkL_EYn)
-
-## Tech Stack
-
-### **Using Langgraph** 
-
-- For building agentic workflows, there are multiple popular frameworks available, such as CrewAI, AutoGen, or Agency Swarm. However, most of them grant full autonomy to the agents while accomplishing tasks and do not provide control over the working process of the agents.
-
-- With Langgraph, you gain that control. You can decide when each agent or tool needs to be called, and you can add custom feedback based on the agent's output, which aids in self-improvement. Essentially, Langgraph is the best choice when you know exactly the process flow of your application, whereas other frameworks allow agents to choose the process.
-
-- Langgraph also enables you to use an LLM only when necessary. For example, in this application, we need to scrape jobs from Upwork, which does not require an LLM call; a simple node tool suffices. In other frameworks, you would need to create an agent that calls the scraping tool through function calling, which helps reduce the application's cost.
-
-### **Using LiteLLM** 
-
-- LiteLLM is a framework that standardizes calls to 100+ LLMs. It allows interaction with different LLMs beyond OpenAI (GPT models) using the same input/output format, simplifying the process of switching models for the application to just changing the model name.
-
-* **Use LLAMA3 with GROQ**:
-  
-```python
-from litellm import completion
-
-response = completion(
-               model="groq/llama3-70b-8192",
-               messages=messages,
-               temperature=0.1
-           )
+```
+├── src/                  # core package
+│   ├── agent.py          # LiteLLM wrapper
+│   ├── config.py         # centralised settings (+ env overrides)
+│   ├── cover_letter.py   # classifier + writer services
+│   ├── graph.py          # LangGraph pipeline
+│   ├── prompts.py        # prompt templates
+│   ├── scraper.py        # Selenium Upwork scraper
+│   └── storage.py        # file I/O helpers
+├── server.py             # Flask API for the extension / Electron app
+├── main.py               # CLI pipeline entry point
+├── tools/paste_job.py    # paste-a-job CLI
+├── chrome-extension/     # browser extension
+├── electron-app/         # desktop app
+├── files/                # user data (profile.md, generated letters)
+├── tests/                # unit tests (no API keys required)
+└── docs/                 # setup, strategy, architecture, deployment
 ```
 
-* **Use Google Gemini**:
-  
-```python
-response = completion(
-               model="gemini/gemini-1.5-flash",
-               messages=messages,
-               temperature=0.1
-           )
+See `docs/ARCHITECTURE.md` for details.
+
+## Getting started
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# configure your API key(s)
+cp .env.example .env
+# edit .env, then add your profile to files/profile.md
 ```
 
-### **Future Improvements** 
+### Run the full pipeline
 
-While the current app provides correct results, it requires further tuning to be used in real job applications.
+```bash
+python main.py
+python main.py --job-title "LangChain Developer" --num-jobs 15
+```
 
-- Currently, only two example letters are provided to the writer agent (directly in its prompt) for crafting personalized letters. This is insufficient, and it would be better to create a file containing multiple cover letters written in the user's style, which will improve the model's output.
+### Generate a letter by pasting a job description
 
-- **Enhanced Feedback Loop**: Implement a mechanism for continuous feedback from user, allowing the model to adapt and learn from user writing style (similar to reinforcement learning from human feedback).
+```bash
+python tools/paste_job.py
+```
 
-## How to Run
+### Run the API server (for extension / Electron app)
 
-### Prerequisites
+```bash
+python server.py
+curl http://localhost:5000/health
+```
 
-- Python 3.9+
-- Tavily API key
-- Groq API key (for Llama3)
-- Google Gemini API key (for using Gemini model)
-- Necessary Python libraries (listed in `requirements.txt`)
+### Tests
 
-### Setup
+```bash
+python -m pytest
+```
 
-1. **Clone the repository:**
+## Configuration
 
-   ```sh
-   git clone https://github.com/AIXerum/Upwork-Auto-Jobs-Applier-using-AI.git
-   cd Upwork-Auto-Jobs-Applier-using-AI
-   ```
+All settings live in `src/config.py` and can be overridden via environment
+variables (see `.env.example`):
 
-2. **Create and activate a virtual environment:**
+| Variable             | Default                                  | Purpose                    |
+|----------------------|------------------------------------------|----------------------------|
+| `MODEL_WRITER`       | `gemini/gemini-2.5-flash-preview-05-20`  | cover letter model         |
+| `MODEL_CLASSIFIER`   | `gemini/gemini-2.5-flash-preview-05-20`  | job classifier model       |
+| `LLM_TEMPERATURE`    | `0.1`                                    | sampling temperature       |
+| `UPWORK_JOB_TITLE`   | `AI Agent Developer`                     | default search term        |
+| `UPWORK_NUM_JOBS`    | `10`                                     | default listings to scrape |
+| `UPWORK_DEFAULT_RATE`| `$85.00`                                 | fallback suggested rate    |
+| `SERVER_HOST`/`PORT` | `0.0.0.0` / `5000`                       | API server binding         |
 
-   ```sh
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
+## API
 
-3. **Install the required packages:**
+| Method | Path                         | Description                        |
+|--------|------------------------------|------------------------------------|
+| GET    | `/health`                    | health check                       |
+| GET    | `/api`                       | endpoint overview                  |
+| POST   | `/api/generate-cover-letter` | body: `{title, description, budget, ...}` |
+| POST   | `/api/log-application`       | record a submitted application     |
 
-   ```sh
-   pip install -r requirements.txt
-   ```
+## Clients
 
-4. **Set up environment variables:**
+- **Chrome extension** - `chrome-extension/README.md`
+- **Electron app** - `electron-app/README.md`
+- **Bookmarklet** - `upwork_bookmarklet.js` (install as a browser bookmark URL)
 
-   Create a `.env` file in the root directory of the project and add your API keys:
+## Deployment
 
-   ```env
-   TAVILY_API_KEY=your_tavily_api_key
-   GEMINI_API_KEY=your_gemini_api_key
-   GROQ_API_KEY=your_groq_api_key
-   ```
+See `docs/DEPLOYMENT.md` - Docker image, `docker compose`, or the `deploy.sh`
+SSH deploy script.
 
-### Running the Application
+## License
 
-1. **Start the workflow:**
-
-   ```sh
-   python main.py
-   ```
-
-   The application will start scraping job listings, classifying them, generating cover letters, and saving the results.
-   
-   By default at the end of the process, all the cover letters generated are saved under `files/cover_letter.txt` file.
-
-3. You can test the Upwork jobs scraping tool by running:
-   ```sh
-   python scrape_upwork_jobs.py
-   ```
-
-### Customization
-
-* To use this automation for you own profile, just add your profile into `files/profile.md` and remove the example profile.
-
-* You can customize the behavior of each agent by modifying the corresponding agent prompt in the `prompts` script.
+MIT (see `electron-app/package.json`). Part of the Upwork Auto Jobs Applier
+project.
