@@ -34,7 +34,7 @@ async function checkServerStatus() {
   } else {
     indicator.className = 'indicator offline';
     text.textContent = 'Offline';
-    logActivity('⚠️ Python server offline - Please run extension_server.py');
+    logActivity('⚠️ Python server offline - Please run server.py');
   }
 }
 

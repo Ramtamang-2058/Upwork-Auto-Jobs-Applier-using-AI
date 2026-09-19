@@ -4,9 +4,9 @@
  */
 
 // Configuration
-// Use production URL when deployed, localhost for development
-const API_URL = 'http://46.202.93.22:5000';  // Production Hostinger VPS
-// const API_URL = 'http://localhost:5000';  // Development (uncomment to use local)
+// Point this at your running server. Localhost for development, or the
+// URL of your deployed server (see docs/DEPLOYMENT.md).
+const API_URL = 'http://localhost:5000';
 
 // Create floating button
 function createExtractButton() {
@@ -221,7 +221,7 @@ async function extractAndSendJob() {
 
     // Send to Python backend
     console.log('📤 Sending to backend:', API_URL);
-    const response = await fetch(`${API_URL}/generate-cover-letter`, {
+    const response = await fetch(`${API_URL}/api/generate-cover-letter`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

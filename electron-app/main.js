@@ -192,7 +192,7 @@ ipcMain.handle('generate-cover-letter', async (event, jobData) => {
   try {
     console.log('🤖 Sending to Python server...');
 
-    const response = await axios.post(`${PYTHON_SERVER}/generate-cover-letter`, jobData, {
+    const response = await axios.post(`${PYTHON_SERVER}/api/generate-cover-letter`, jobData, {
       timeout: 30000
     });
 

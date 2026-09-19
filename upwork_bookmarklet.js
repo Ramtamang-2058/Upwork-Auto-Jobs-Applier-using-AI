@@ -76,7 +76,7 @@
     // Send to automation server
     async function generateCoverLetter(jobData) {
         try {
-            const response = await fetch('http://localhost:5000/generate-cover-letter', {
+            const response = await fetch('http://localhost:5000/api/generate-cover-letter', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -93,7 +93,7 @@
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error connecting to automation server. Make sure it\'s running:\n\npython automation_server.py');
+            alert('Error connecting to the server. Make sure it\'s running:\n\npython server.py');
             throw error;
         }
     }
@@ -191,7 +191,7 @@
                 <h3 style="margin: 0 0 15px 0; color: red;">❌ Error</h3>
                 <p style="margin: 0; font-size: 14px;">${error.message}</p>
                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
-                    Make sure automation_server.py is running
+                    Make sure server.py is running
                 </p>
                 <button onclick="this.parentElement.remove()" style="
                     margin-top: 15px;

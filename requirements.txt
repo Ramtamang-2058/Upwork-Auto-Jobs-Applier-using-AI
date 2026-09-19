@@ -1,6 +1,10 @@
 langgraph
 litellm
 selenium
-webdriver_manager
+webdriver-manager
 colorama
 python-dotenv
+flask
+flask-cors
+pyperclip
+pytest

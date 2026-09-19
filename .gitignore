@@ -1,2 +1,29 @@
+# Environment & secrets
 .env
-src/__pycache__/
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+.pytest_cache/
+
+# IDEs / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Generated data (keep files/profile.md tracked)
+files/upwork_job_listings.txt
+files/cover_letter.txt
+files/latest_cover_letter.txt
+files/application_log.txt
+files/applications_sent.json
+
+# Debug artifacts
+debug_*.html
+debug_*.png
+
+# Node
+node_modules/
