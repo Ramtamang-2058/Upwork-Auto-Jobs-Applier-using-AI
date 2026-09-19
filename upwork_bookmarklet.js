@@ -73,6 +73,21 @@
         return data;
     }
 
+    // Drop the job into the monitor inbox (no-API path). Best-effort.
+    async function queueJob(jobData) {
+        try {
+            const response = await fetch('http://localhost:5000/api/queue-job', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(jobData)
+            });
+            return response.ok;
+        } catch (error) {
+            console.warn('Queue failed (server down?)', error);
+            return false;
+        }
+    }
+
     // Send to automation server
     async function generateCoverLetter(jobData) {
         try {
@@ -147,8 +162,7 @@
             font-family: Arial, sans-serif;
         `;
         overlay.innerHTML = `
-            <h3 style="margin: 0 0 15px 0;">🤖 Generating AI Cover Letter...</h3>
-            <p style="margin: 0; color: #666;">Using your Microsoft & Home Depot experience</p>
+            <h3 style="margin: 0;">🤖 Generating AI Cover Letter...</h3>
         `;
         document.body.appendChild(overlay);
 
@@ -156,6 +170,12 @@
             // Extract job data
             const jobData = extractJobData();
             console.log('Job data extracted:', jobData);
+
+            // Queue into the monitor inbox (works without an API key)
+            const queued = await queueJob(jobData);
+            overlay.innerHTML = queued
+                ? `<h3 style="margin: 0 0 10px 0;">📥 Queued for matching...</h3>`
+                : overlay.innerHTML;
 
             // Generate cover letter
             const result = await generateCoverLetter(jobData);

@@ -21,6 +21,14 @@ files/latest_cover_letter.txt
 files/application_log.txt
 files/applications_sent.json
 
+# Monitor / handoff artifacts
+files/inbox_jobs.jsonl
+files/queue_matches.jsonl
+files/application_log.jsonl
+files/monitor_seen.json
+files/proposals/
+files/claude_prompts/
+
 # Debug artifacts
 debug_*.html
 debug_*.png

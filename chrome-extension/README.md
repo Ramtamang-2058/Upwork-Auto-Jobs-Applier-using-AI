@@ -63,4 +63,4 @@ chrome-extension/
 └── README.md          # This file
 ```
 
-See `../docs/DEPLOYMENT.md` for production deployment of the backend.
+See `../docs/DEPLOYMENT.md` for running the backend (venv, no Docker required).

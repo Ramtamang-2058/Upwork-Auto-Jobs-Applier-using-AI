@@ -1,41 +1,41 @@
-# Deployment
+# Running the API server (no Docker)
 
-This project ships the Flask API as a Docker container so the Chrome extension
-and Electron app can reach it from anywhere.
+The project runs in a plain Python virtual environment - no container needed.
+Works on your workstation and on a small VPS alike.
 
-## Local Docker build
-
-```bash
-docker build -t upwork-cover-letter-api:latest .
-docker run -p 5000:5000 --env-file .env upwork-cover-letter-api:latest
-
-curl http://localhost:5000/health
-```
-
-## Docker Compose
+## Local run
 
 ```bash
-docker compose up -d --build
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env          # add GEMINI_API_KEY if you use the LLM endpoints
+python server.py              # http://localhost:5000
 ```
 
-## SSH deploy script
+The server starts without an API key or `files/profile.md`. LLM-based endpoints
+(`/api/generate-cover-letter`) will fail until a key is configured; the monitor
+endpoints (`/api/queue-job`, `/api/log-application`) and the health/overview
+routes always work.
 
-Everything needed is packaged and sent to a remote host:
+## Optional: run monitor + scheduler
 
 ```bash
-VPS_IP=203.0.113.10 VPS_USER=root ./deploy.sh
+python tools/upwork_monitor.py --interval 600     # check for queued jobs
 ```
 
-The script tests SSH, packages the app (excluding secrets and dev files),
-transfers it, installs Docker if missing, builds the image and starts the
-container. It also copies `.env.example` to `.env` on first run so you can add
-your API keys, then re-run.
+See `docs/SETUP.md` for the full manual workflow (queue jobs from the browser,
+paste them into Claude, submit proposals yourself).
 
-## Hardening notes
+## Headless VPS
 
-- **Never commit `.env`.** Keys are injected via `--env-file` / environment.
-- **CORS** is open by default for development. Restrict origins in production,
-  e.g. to your extension's ID.
-- **HTTPS** — terminate TLS with a reverse proxy (Nginx/Caddy) in front of the
-  container; do not expose port 5000 directly.
-- **Rate limiting** — add `flask-limiter` if the endpoint is public.
+The default `server.py` uses Flask's dev server, which is fine for a single
+user hitting it from your own browser/extension. If you want gunicorn on a VPS:
+
+```bash
+source venv/bin/activate && pip install gunicorn
+gunicorn --bind 0.0.0.0:5000 server:app
+```
+
+Put it behind your VPS firewall / a reverse proxy if you expose it publicly.
+`SERVER_HOST`/`SERVER_PORT` in `.env` control the bind address for `python server.py`.

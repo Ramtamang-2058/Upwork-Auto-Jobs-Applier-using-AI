@@ -64,3 +64,46 @@ def record_application(data, filename=None):
     filename = Path(filename or Config.APPLICATIONS_SENT_FILE)
     with open(filename, "a", encoding="utf-8") as file:
         file.write(json.dumps(data) + "\n")
+
+
+# --- JSONL helpers for the monitor --------------------------------------
+
+def read_jsonl(filename):
+    """Read a JSONL file into a list of dicts. Missing/corrupt lines are skipped."""
+    filename = Path(filename)
+    if not filename.exists():
+        return []
+    rows = []
+    for line in filename.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    return rows
+
+
+def append_jsonl(filename, obj):
+    """Append one record to a JSONL file, creating the file if needed."""
+    filename = Path(filename)
+    filename.parent.mkdir(parents=True, exist_ok=True)
+    with open(filename, "a", encoding="utf-8") as file:
+        file.write(json.dumps(obj, default=str) + "\n")
+
+
+def append_event(event, job, details=None):
+    """Record a structured decision/event to the monitor's event log."""
+    entry = {
+        "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "event": event,
+        "job": job.get("link") or job.get("title"),
+        "details": details or {},
+    }
+    append_jsonl(Config.EVENTS_LOG_FILE, entry)
+    return entry
+
+
+def ensure_dir(path):
+    """Create a directory if it does not exist."""
+    Path(path).mkdir(parents=True, exist_ok=True)

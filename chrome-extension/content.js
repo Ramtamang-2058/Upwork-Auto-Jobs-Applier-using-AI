@@ -219,6 +219,17 @@ async function extractAndSendJob() {
       }
     }
 
+    // Queue the job into the monitor inbox first (works without an API key).
+    try {
+      await fetch(`${API_URL}/api/queue-job`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jobData)
+      });
+    } catch (error) {
+      console.warn('Queue skipped (backend unreachable?)', error);
+    }
+
     // Send to Python backend
     console.log('📤 Sending to backend:', API_URL);
     const response = await fetch(`${API_URL}/api/generate-cover-letter`, {

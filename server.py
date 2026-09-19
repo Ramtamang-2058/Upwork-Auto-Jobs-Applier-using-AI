@@ -4,6 +4,7 @@ Endpoints:
     GET  /health                 health check
     GET  /api                    API overview
     POST /api/generate-cover-letter   generate a cover letter for a job
+    POST /api/queue-job          drop a job into the monitor's inbox
     POST /api/log-application    record a submitted application
 
 Used by the Chrome extension, the Electron app and the browser bookmarklet.
@@ -16,15 +17,23 @@ from flask_cors import CORS
 
 from src.config import Config
 from src.cover_letter import CoverLetterGenerator
-from src.storage import append_cover_letter, log_application, record_application
+from src.storage import append_cover_letter, append_jsonl, record_application
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-generator = CoverLetterGenerator()
+# Built lazily so the server boots even without an API key / profile.
+_generator = None
 jobs_processed = 0
+
+
+def get_generator():
+    global _generator
+    if _generator is None:
+        _generator = CoverLetterGenerator()
+    return _generator
 
 
 def extract_rate_suggestion(budget_str):
@@ -60,6 +69,7 @@ def api_overview():
         endpoints={
             "health": "/health",
             "generate-cover-letter": "/api/generate-cover-letter",
+            "queue-job": "/api/queue-job",
             "log-application": "/api/log-application",
         },
         success=True,
@@ -75,7 +85,7 @@ def generate_cover_letter():
         return jsonify(error="Missing job description"), 400
 
     try:
-        letter = generator.generate(_format_job_description(job_data))
+        letter = get_generator().generate(_format_job_description(job_data))
     except Exception as exc:
         return jsonify(error=str(exc), message="Failed to generate cover letter"), 500
 
@@ -90,6 +100,16 @@ def generate_cover_letter():
         length=len(letter),
         jobs_processed=jobs_processed,
     )
+
+
+@app.post("/api/queue-job")
+def queue_job():
+    """Drop a job dict into the monitor's inbox for later gating."""
+    data = request.get_json(silent=True) or {}
+    if not data.get("link") and not data.get("title"):
+        return jsonify(error="Job needs at least a link or title"), 400
+    append_jsonl(Config.INBOX_FILE, data)
+    return jsonify(success=True, queued=True)
 
 
 @app.post("/api/log-application")

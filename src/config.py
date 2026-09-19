@@ -19,6 +19,15 @@ class Config:
     APPLICATION_LOG_FILE = FILES_DIR / "application_log.txt"
     APPLICATIONS_SENT_FILE = FILES_DIR / "applications_sent.json"
 
+    # --- Monitor / handoff ----------------------------------------------------
+    INBOX_FILE = FILES_DIR / "inbox_jobs.jsonl"        # jobs dropped in by client/browser
+    MATCHES_FILE = FILES_DIR / "queue_matches.jsonl"   # strong matches awaiting a proposal
+    EVENTS_LOG_FILE = FILES_DIR / "application_log.jsonl"  # every decision, structured
+    SEEN_FILE = FILES_DIR / "monitor_seen.json"        # links already processed
+    PROPOSALS_DIR = FILES_DIR / "proposals"            # captured Claude proposals
+    CLAUDE_PROMPTS_DIR = FILES_DIR / "claude_prompts"  # ready-to-paste handoff prompts
+    GUIDELINES_FILE = ROOT / "guidelines" / "apply.md"
+
     # --- Pipeline defaults --------------------------------------------------
     DEFAULT_JOB_TITLE = os.getenv("UPWORK_JOB_TITLE", "AI Agent Developer")
     DEFAULT_NUM_JOBS = int(os.getenv("UPWORK_NUM_JOBS", "10"))
@@ -31,6 +40,10 @@ class Config:
     # --- API server ---------------------------------------------------------
     SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
     SERVER_PORT = int(os.getenv("SERVER_PORT", "5000"))
+
+    # --- Monitor --------------------------------------------------------------
+    MONITOR_INTERVAL = int(os.getenv("MONITOR_INTERVAL", "300"))  # seconds between passes
+    DEFAULT_MIN_SCORE = int(os.getenv("MIN_MATCH_SCORE", "60"))
 
     # --- Profile / rate -------------------------------------------------------
     FREELANCER_NAME = os.getenv("FREELANCER_NAME", "Christopher")
